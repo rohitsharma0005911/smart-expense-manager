@@ -18,7 +18,7 @@ import { selectBudgetUsage } from "./features/expenses/expenseSlice";
 import { selectRemainingBudget } from "./features/expenses/expenseSlice";
 import Modal from "./components/ui/Modal";
 import { closeEditModal, selectIsEditModalOpen, selectSortBy, setSortBy } from "./features/ui/uiSlice";
-import { selectEditingExpense, setEditingExpense } from "./features/expenses/expenseSlice";
+
 import AddExpenseForm from "./components/AddExpenseForm.tsx";
 import EditExpenseForm from "./components/EditExpenseForm.tsx";
 import ConfirmDeleteModal from "./components/ConfirmDeleteModal.tsx";
@@ -45,7 +45,7 @@ function App() {
   const budget = useAppSelector(selectBudget);
   const budgetUsage = useAppSelector(selectBudgetUsage);
   const remainingBudget = useAppSelector(selectRemainingBudget);
-  const editingExpense = useAppSelector(selectEditingExpense);
+
   const dispatch = useAppDispatch();
   const isEditModalOpen = useAppSelector(selectIsEditModalOpen);
 

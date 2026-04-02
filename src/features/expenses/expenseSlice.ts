@@ -11,8 +11,11 @@ interface ExpenseState {
   expenseToDelete: Expense | null;
 }
 
-const loadExpenses = () => {
+// ✅ SSR safe load
+const loadExpenses = (): Expense[] => {
   try {
+    if (typeof window === "undefined") return [];
+
     const data = localStorage.getItem("expenses");
     return data ? JSON.parse(data) : [];
   } catch {
@@ -34,36 +37,36 @@ const expenseSlice = createSlice({
   reducers: {
     addExpense: (state, action: PayloadAction<Expense>) => {
       state.items.push(action.payload);
-      localStorage.setItem("expenses", JSON.stringify(state.items));
     },
 
-    removeExpense: (state, action: PayloadAction<string>) => {
-      state.items = state.items.filter(
-        (expense) => expense.id !== action.payload,
-      );
-      localStorage.setItem("expenses", JSON.stringify(state.items));
-    },
     updateExpense: (state, action: PayloadAction<Expense>) => {
       const index = state.items.findIndex(
-        (expense) => expense.id === action.payload.id,
+        (expense) => expense.id === action.payload.id
       );
 
       if (index !== -1) {
         state.items[index] = action.payload;
-        localStorage.setItem("expenses", JSON.stringify(state.items));
       }
     },
-    deleteExpense: (state, action) => {
+
+    // ✅ single delete (remove duplicate)
+    deleteExpense: (state, action: PayloadAction<string>) => {
       state.items = state.items.filter(
-        (expense) => expense.id !== action.payload,
+        (expense) => expense.id !== action.payload
       );
     },
 
-    setEditingExpense: (state, action) => {
+    setEditingExpense: (
+      state,
+      action: PayloadAction<Expense | null>
+    ) => {
       state.editingExpense = action.payload;
     },
 
-    setExpenseToDelete: (state, action) => {
+    setExpenseToDelete: (
+      state,
+      action: PayloadAction<Expense | null>
+    ) => {
       state.expenseToDelete = action.payload;
     },
 
@@ -73,21 +76,24 @@ const expenseSlice = createSlice({
   },
 });
 
-/* ---------- SELECTORS ---------- */
+/* ---------- ACTIONS ---------- */
 export const {
   addExpense,
   updateExpense,
-  deleteExpense, // 👈 MUST BE HERE
+  deleteExpense,
   setEditingExpense,
   setExpenseToDelete,
   clearExpenseToDelete,
-  removeExpense,
 } = expenseSlice.actions;
+
+/* ---------- SELECTORS ---------- */
 export const selectEditingExpense = (state: RootState) =>
   state.expenses.editingExpense;
-export const selectExpenseToDelete = (state: any) =>
-  state?.expenses?.expenseToDelete;
-// Total (all)
+
+export const selectExpenseToDelete = (state: RootState) =>
+  state.expenses.expenseToDelete;
+
+// Total expense
 export const selectTotalExpense = (state: RootState) =>
   state.expenses.items.reduce((total, expense) => total + expense.amount, 0);
 
@@ -101,26 +107,27 @@ export const selectTotalByCategory =
         ? expenses
         : expenses.filter(
             (expense) =>
-              expense.category.toLowerCase() === category.toLowerCase(),
+              expense.category.toLowerCase() === category.toLowerCase()
           );
 
     return filtered.reduce((total, expense) => total + expense.amount, 0);
   };
 
 // Category count
-export const selectExpenseCount = (category: string) => (state: RootState) => {
-  const expenses = state.expenses.items;
+export const selectExpenseCount =
+  (category: string) => (state: RootState) => {
+    const expenses = state.expenses.items;
 
-  const filtered =
-    category === "All"
-      ? expenses
-      : expenses.filter(
-          (expense) =>
-            expense.category.toLowerCase() === category.toLowerCase(),
-        );
+    const filtered =
+      category === "All"
+        ? expenses
+        : expenses.filter(
+            (expense) =>
+              expense.category.toLowerCase() === category.toLowerCase()
+          );
 
-  return filtered.length;
-};
+    return filtered.length;
+  };
 
 // Category summary
 export const selectCategorySummary = (state: RootState) => {
@@ -136,7 +143,7 @@ export const selectCategorySummary = (state: RootState) => {
   return summary;
 };
 
-// Monthly comparison (ONLY ONE VERSION)
+// Monthly comparison
 export const selectMonthlyComparison = (state: RootState) => {
   const expenses = state.expenses.items;
 
@@ -145,7 +152,6 @@ export const selectMonthlyComparison = (state: RootState) => {
   const currentYear = now.getFullYear();
 
   const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-
   const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear;
 
   let currentTotal = 0;
@@ -178,19 +184,23 @@ export const selectMonthlyComparison = (state: RootState) => {
 
 export default expenseSlice.reducer;
 
+/* ---------- EXTRA SELECTORS ---------- */
+
+// Savings
 export const selectSavings = (state: RootState) => {
   const totalExpense = state.expenses.items.reduce(
     (total, expense) => total + expense.amount,
-    0,
+    0
   );
 
   return state.income.amount - totalExpense;
 };
 
+// Budget usage %
 export const selectBudgetUsage = (state: RootState) => {
   const totalExpense = state.expenses.items.reduce(
     (total, expense) => total + expense.amount,
-    0,
+    0
   );
 
   const budget = Number(state.income.budget);
@@ -200,10 +210,11 @@ export const selectBudgetUsage = (state: RootState) => {
   return (totalExpense / budget) * 100;
 };
 
+// Remaining budget
 export const selectRemainingBudget = (state: RootState) => {
   const totalExpense = state.expenses.items.reduce(
     (total, expense) => total + expense.amount,
-    0,
+    0
   );
 
   const budget = Number(state.income.budget);
@@ -211,4 +222,5 @@ export const selectRemainingBudget = (state: RootState) => {
   if (!budget || budget <= 0) return 0;
 
   return budget - totalExpense;
+  
 };
