@@ -3,36 +3,33 @@ import expenseReducer from "../features/expenses/expenseSlice";
 import incomeReducer from "../features/income/incomeSlice";
 import uiReducer from "../features/ui/uiSlice";
 
-// ✅ Root reducer
-const reducer = {
-  expenses: expenseReducer,
-  income: incomeReducer,
-  ui: uiReducer,
-};
 
 // ✅ Load state from localStorage
-const loadState = (): Partial<{
-  expenses: ReturnType<typeof expenseReducer>;
-  income: ReturnType<typeof incomeReducer>;
-  ui: ReturnType<typeof uiReducer>;
-}> | undefined => {
-  try {
-    if (typeof window === "undefined") return undefined;
+// const loadState = (): Partial<{
+//   expenses: ReturnType<typeof expenseReducer>;
+//   income: ReturnType<typeof incomeReducer>;
+//   ui: ReturnType<typeof uiReducer>;
+// }> | undefined => {
+//   try {
+//     if (typeof window === "undefined") return undefined;
 
-    const serializedState = localStorage.getItem("expensesState");
+//     const serializedState = localStorage.getItem("expensesState");
 
-    if (!serializedState) return undefined;
+//     if (!serializedState) return undefined;
 
-    return JSON.parse(serializedState);
-  } catch {
-    return undefined;
-  }
-};
+//     return JSON.parse(serializedState);
+//   } catch {
+//     return undefined;
+//   }
+// };
 
 // ✅ Create store
 export const store = configureStore({
-  reducer,
-  preloadedState: loadState(),
+  reducer: {
+    expenses: expenseReducer,
+    income: incomeReducer,
+    ui: uiReducer,
+  },
 });
 
 // ✅ Types
