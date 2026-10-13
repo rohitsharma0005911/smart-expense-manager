@@ -23,7 +23,7 @@ const BudgetForm = () => {
             />
             <button
                 type="submit"
-                className="rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 px-5 py-3 font-semibold text-white shadow-lg shadow-violet-200 transition hover:translate-y-[-1px] hover:shadow-xl hover:shadow-violet-200"
+                className="rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 px-5 py-3 font-semibold text-white shadow-lg shadow-violet-200 transition hover:translate-y-[-1px] hover:shadow-xl hover:shadow-violet-200 whitespace-nowrap"
             >
                 Save Budget
             </button>

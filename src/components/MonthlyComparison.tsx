@@ -6,7 +6,7 @@ const MonthlyComparison = () => {
         useAppSelector(selectMonthlyComparison);
 
     return (
-        <div className="bg-white p-6 rounded-xl shadow-md border mt-6 max-w-3xl">
+        <div className="bg-white max-w-3xl">
             <h2 className="text-lg font-semibold mb-4">
                 Monthly Comparison
             </h2>

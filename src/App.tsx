@@ -27,15 +27,25 @@ import {
 import AddExpenseForm from "./components/AddExpenseForm.tsx";
 import EditExpenseForm from "./components/EditExpenseForm.tsx";
 import ConfirmDeleteModal from "./components/ConfirmDeleteModal.tsx";
+import UpcomingBills from "./components/UpcomingBills";
+import BorrowedLent from "./components/BorrowedLent";
+import CategoryBudgets from "./components/CategoryBudgets";
+import RecurringExpenses from "./components/RecurringExpenses";
+import ReportsAndData from "./components/ReportsAndData";
+import BillNotificationMonitor from "./components/BillNotificationMonitor";
 
 const StatCard = ({
   title,
   value,
   tone,
+  actionLabel,
+  onAction,
 }: {
   title: string;
   value: string | number;
   tone: string;
+  actionLabel?: string;
+  onAction?: () => void;
 }) => (
   <div className="rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-[0_12px_30px_rgba(15,23,42,0.08)] backdrop-blur-sm">
     <div className="mb-3 flex items-center justify-between">
@@ -43,6 +53,15 @@ const StatCard = ({
       <span className={`inline-flex h-2.5 w-2.5 rounded-full ${tone}`} />
     </div>
     <h2 className="text-3xl font-bold tracking-tight text-slate-800">{value}</h2>
+    {actionLabel && onAction && (
+      <button
+        type="button"
+        onClick={onAction}
+        className="mt-4 rounded-lg bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100 focus:outline-none focus:ring-4 focus:ring-emerald-100"
+      >
+        {actionLabel}
+      </button>
+    )}
   </div>
 );
 
@@ -52,9 +71,18 @@ const navigation = [
   { id: "transactions", label: "Transactions", icon: "↕" },
   { id: "add-expense", label: "Add expense", icon: "+" },
   { id: "finances", label: "Budget & income", icon: "▤" },
+  { id: "reports", label: "Reports & backup", icon: "▥" },
 ] as const;
 
-type Section = (typeof navigation)[number]["id"];
+const moneyToolsNavigation = [
+  { id: "upcoming-bills", label: "Bill reminders", icon: "◷" },
+  { id: "borrowed-lent", label: "Borrowed & lent", icon: "⇄" },
+  { id: "recurring", label: "Recurring expenses", icon: "⟳" },
+] as const;
+
+type Section =
+  | (typeof navigation)[number]["id"]
+  | (typeof moneyToolsNavigation)[number]["id"];
 
 function App() {
   const [activeSection, setActiveSection] = useState<Section>("overview");
@@ -100,7 +128,9 @@ function App() {
   const budgetProgress = Math.min(budgetUsage, 100);
   const budgetTone =
     budgetUsage >= 100 ? "bg-red-500" : budgetUsage >= 80 ? "bg-amber-400" : "bg-emerald-500";
-  const activePage = navigation.find((item) => item.id === activeSection);
+  const activePage = [...navigation, ...moneyToolsNavigation].find(
+    (item) => item.id === activeSection
+  );
   const hasActiveFilters =
     selectedCategory !== "All" ||
     selectedMonth !== "All" ||
@@ -118,8 +148,9 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,#e0f2fe,#f8fafc_46%,#e2e8f0)] text-slate-800">
+      <BillNotificationMonitor />
       <div className="mx-auto flex min-h-screen max-w-400 flex-col lg:flex-row">
-        <aside className="border-b border-slate-200 bg-white/90 p-4 shadow-sm backdrop-blur-sm lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:shrink-0 lg:border-b-0 lg:border-r lg:p-6">
+        <aside className="flex flex-col border-b border-slate-200 bg-white/90 p-4 shadow-sm backdrop-blur-sm lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:shrink-0 lg:border-b-0 lg:border-r lg:p-6">
           <div className="mb-5 flex items-center gap-3 lg:mb-10">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-linear-to-br from-sky-600 to-indigo-600 text-lg font-black text-white shadow-lg shadow-sky-200">
               S
@@ -166,10 +197,43 @@ function App() {
             })}
           </nav>
 
-          <div className="mt-8 hidden rounded-2xl bg-slate-50 p-4 lg:block">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">This month</p>
-            <p className="mt-2 text-lg font-bold text-slate-800">₹ {totalExpense}</p>
-            <p className="mt-1 text-xs text-slate-500">Total expenses tracked</p>
+          <div className="mt-6 lg:mt-auto">
+            <div className="mb-5 hidden rounded-2xl bg-slate-50 p-4 lg:block">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">This month</p>
+              <p className="mt-2 text-lg font-bold text-slate-800">₹ {totalExpense}</p>
+              <p className="mt-1 text-xs text-slate-500">Total expenses tracked</p>
+            </div>
+            <p className="mb-2 px-1 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
+              Money tools
+            </p>
+            <nav aria-label="Money tools" className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible">
+              {moneyToolsNavigation.map((item) => {
+                const isActive = activeSection === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    aria-current={isActive ? "page" : undefined}
+                    onClick={() => setActiveSection(item.id)}
+                    className={`flex shrink-0 items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold transition ${
+                      isActive
+                        ? "bg-indigo-600 text-white shadow-md shadow-indigo-200"
+                        : "text-slate-600 hover:bg-indigo-50 hover:text-indigo-800"
+                    }`}
+                  >
+                    <span
+                      className={`flex h-7 w-7 items-center justify-center rounded-lg text-base ${
+                        isActive ? "bg-white/20" : "bg-indigo-50 text-indigo-600"
+                      }`}
+                      aria-hidden="true"
+                    >
+                      {item.icon}
+                    </span>
+                    {item.label}
+                  </button>
+                );
+              })}
+            </nav>
           </div>
         </aside>
 
@@ -186,15 +250,32 @@ function App() {
                 Track, understand, and manage your money with clarity.
               </p>
             </div>
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 shadow-sm">
-              Track • Analyze • Improve
-            </div>
+            {activeSection === "overview" ? (
+              <button
+                type="button"
+                onClick={() => setActiveSection("add-expense")}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-sky-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-200 transition hover:bg-sky-700 focus:outline-none focus:ring-4 focus:ring-sky-200"
+              >
+                <span aria-hidden="true" className="text-lg leading-none">+</span>
+                Add expense
+              </button>
+            ) : (
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 shadow-sm">
+                Track • Analyze • Improve
+              </div>
+            )}
           </header>
 
           {activeSection === "overview" && (
             <>
               <section className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <StatCard title="Income" value={`₹ ${income}`} tone="bg-emerald-500" />
+                <StatCard
+                  title="Income"
+                  value={`₹ ${income}`}
+                  tone="bg-emerald-500"
+                  actionLabel={income > 0 ? "Edit income" : "Add income"}
+                  onAction={() => setActiveSection("finances")}
+                />
                 <StatCard title="Total Expenses" value={`₹ ${totalExpense}`} tone="bg-red-500" />
                 <StatCard title="Savings" value={`₹ ${savings}`} tone="bg-sky-500" />
                 <StatCard title="Transactions" value={expenseCount} tone="bg-violet-500" />
@@ -355,8 +436,8 @@ function App() {
           )}
 
           {activeSection === "finances" && (
-            <div className="max-w-3xl space-y-6">
-              <section className="rounded-[26px] border border-slate-200 bg-white/85 p-6 shadow-[0_18px_45px_rgba(15,23,42,0.06)]">
+            <div className="flex flex-wrap gap-3 ">
+              <section className="rounded-[26px] w-[48%] border border-slate-200 bg-white/85 p-6 shadow-[0_18px_45px_rgba(15,23,42,0.06)]">
                 <h2 className="mb-1 text-xl font-bold text-slate-800">Monthly budget</h2>
                 <p className="mb-5 text-sm text-slate-500">Set a spending limit and monitor how much remains.</p>
                 <BudgetForm />
@@ -373,13 +454,22 @@ function App() {
                   </p>
                 </div>
               </section>
-              <section className="rounded-[26px] border border-slate-200 bg-white/85 p-6 shadow-[0_18px_45px_rgba(15,23,42,0.06)]">
+              <section className="rounded-[26px] w-[48%] border border-slate-200 bg-white/85 p-6 shadow-[0_18px_45px_rgba(15,23,42,0.06)]">
                 <h2 className="mb-1 text-xl font-bold text-slate-800">Monthly income</h2>
                 <p className="mb-5 text-sm text-slate-500">Keep your income up to date for an accurate savings overview.</p>
                 <IncomeForm />
               </section>
+              <CategoryBudgets />
             </div>
           )}
+
+          {activeSection === "upcoming-bills" && <UpcomingBills />}
+
+          {activeSection === "borrowed-lent" && <BorrowedLent />}
+
+          {activeSection === "recurring" && <RecurringExpenses />}
+
+          {activeSection === "reports" && <ReportsAndData />}
         </main>
       </div>
 

@@ -14,7 +14,7 @@ const ExpenseItem = ({ expense }: Props) => {
     const dispatch = useAppDispatch();
 
     return (
-        <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm transition hover:border-sky-200 hover:bg-white">
+        <div className="flex items-center justify-between gap-4 transition hover:border-sky-200 hover:bg-white">
             <div className="min-w-0">
                 <div className="mb-1 flex items-center gap-2">
                     <h3 className="truncate text-lg font-semibold text-slate-800">{expense.title}</h3>
