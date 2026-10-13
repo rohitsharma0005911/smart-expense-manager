@@ -7,54 +7,21 @@ interface IncomeState {
   budget: number;
 }
 
-const loadIncome = (): number => {
-  try {
-    if (typeof window === "undefined") return 0;
-
-    const data = localStorage.getItem("income");
-
-    return data ? JSON.parse(data) : 0;
-  } catch {
-    return 0;
-  }
-};
-
-const loadBudget = (): number => {
-  try {
-    if (typeof window === "undefined") return 0;
-
-    const data = localStorage.getItem("budget");
-
-    return data ? JSON.parse(data) : 0;
-  } catch {
-    return 0;
-  }
-};
-
 const initialState: IncomeState = {
-  amount: loadIncome(),
-  budget: loadBudget(),
+  amount: 0,
+  budget: 0,
 };
 
 const incomeSlice = createSlice({
   name: "income",
   initialState,
   reducers: {
-  setIncome: (state, action: PayloadAction<number>) => {
-  state.amount = action.payload;
-
-  if (typeof window !== "undefined") {
-    localStorage.setItem("income", JSON.stringify(state.amount));
-  }
-},
-
-setBudget: (state, action: PayloadAction<number>) => {
-  state.budget = action.payload;
-
-  if (typeof window !== "undefined") {
-    localStorage.setItem("budget", JSON.stringify(state.budget));
-  }
-},
+    setIncome: (state, action: PayloadAction<number>) => {
+      state.amount = action.payload;
+    },
+    setBudget: (state, action: PayloadAction<number>) => {
+      state.budget = action.payload;
+    },
   },
 });
 

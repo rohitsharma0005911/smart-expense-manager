@@ -5,22 +5,20 @@ const CategorySummary = () => {
     const summary = useAppSelector(selectCategorySummary);
 
     return (
-        <div className="bg-white p-6 rounded-xl shadow-md border max-w-3xl">
-            <h2 className="text-lg font-semibold mb-4">
-                Category Breakdown
-            </h2>
+        <div className="max-w-3xl">
+            <h2 className="mb-4 text-xl font-bold text-slate-800">Category Breakdown</h2>
 
             {Object.keys(summary).length === 0 ? (
-                <p className="text-gray-500">No data available</p>
+                <p className="text-slate-500">No data available</p>
             ) : (
-                <div className="space-y-2">
+                <div className="space-y-3">
                     {Object.entries(summary).map(([category, total]) => (
                         <div
                             key={category}
-                            className="flex justify-between border-b pb-2"
+                            className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"
                         >
-                            <span>{category}</span>
-                            <span className="font-semibold">₹ {total}</span>
+                            <span className="font-medium text-slate-700">{category}</span>
+                            <span className="font-bold text-slate-900">₹ {total}</span>
                         </div>
                     ))}
                 </div>

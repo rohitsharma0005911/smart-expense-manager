@@ -11,20 +11,8 @@ interface ExpenseState {
   expenseToDelete: Expense | null;
 }
 
-// ✅ SSR safe load
-const loadExpenses = (): Expense[] => {
-  try {
-    if (typeof window === "undefined") return [];
-
-    const data = localStorage.getItem("expenses");
-    return data ? JSON.parse(data) : [];
-  } catch {
-    return [];
-  }
-};
-
 const initialState: ExpenseState = {
-  items: loadExpenses(),
+  items: [],
   loading: false,
   error: null,
   editingExpense: null,

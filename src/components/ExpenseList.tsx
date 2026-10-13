@@ -5,69 +5,81 @@ import ExpenseItem from "./ExpenseItem";
 interface Props {
     selectedCategory: string;
     selectedMonth: string;
+    dateFrom: string;
+    dateTo: string;
     searchTerm: string;
 }
 
-const ExpenseList = ({ selectedCategory, selectedMonth, searchTerm }: Props) => {
+const ExpenseList = ({ selectedCategory, selectedMonth, dateFrom, dateTo, searchTerm }: Props) => {
     const expenses = useAppSelector((state) => state.expenses.items);
     const sortBy = useAppSelector(selectSortBy);
 
-    // 1️⃣ Category Filter
     let filteredExpenses =
         selectedCategory === "All"
             ? expenses
-            : expenses.filter(
-                (expense) => expense.category === selectedCategory
-            );
+            : expenses.filter((expense) => expense.category === selectedCategory);
 
-    // 2️⃣ Month Filter
     if (selectedMonth !== "All") {
         filteredExpenses = filteredExpenses.filter((expense) =>
             expense.date.startsWith(selectedMonth)
         );
     }
-    // 3️⃣ Search Filter
+
+    if (dateFrom) {
+        filteredExpenses = filteredExpenses.filter((expense) => expense.date >= dateFrom);
+    }
+
+    if (dateTo) {
+        filteredExpenses = filteredExpenses.filter((expense) => expense.date <= dateTo);
+    }
+
     if (searchTerm.trim() !== "") {
         const normalizedSearch = searchTerm.toLowerCase();
         filteredExpenses = filteredExpenses.filter((expense) =>
             expense.title.toLowerCase().includes(normalizedSearch)
         );
     }
-    // 2️⃣ Sorting Logic
+
     const sortedExpenses = [...filteredExpenses].sort((a, b) => {
         switch (sortBy) {
             case "date-desc":
                 return new Date(b.date).getTime() - new Date(a.date).getTime();
-
             case "date-asc":
                 return new Date(a.date).getTime() - new Date(b.date).getTime();
-
             case "amount-desc":
                 return b.amount - a.amount;
-
             case "amount-asc":
                 return a.amount - b.amount;
-
             default:
                 return 0;
         }
     });
 
-    const totalAmount = sortedExpenses.reduce(
-        (sum, expense) => sum + expense.amount,
-        0
-    );
+    const totalAmount = sortedExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+
     return (
-        <div className="mt-8 space-y-4 max-w-md">
-            <div className="bg-gray-100 p-4 rounded-xl border border-gray-300">
-                <h2 className="text-lg font-semibold">Total Spent</h2>
-                <p className="text-2xl font-bold text-green-600">
-                    ₹ {totalAmount}
+        <div className="space-y-4">
+            <div className="flex flex-col gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <p className="text-sm font-medium text-emerald-700">Total spent</p>
+                    <p className="mt-1 text-3xl font-black tracking-tight text-emerald-600">₹ {totalAmount}</p>
+                </div>
+                <p className="text-sm font-medium text-emerald-800">
+                    {sortedExpenses.length} {sortedExpenses.length === 1 ? "expense" : "expenses"} found
                 </p>
             </div>
-            {sortedExpenses.map((expense) => (
-                <ExpenseItem key={expense.id} expense={expense} />
-            ))}
+
+            {sortedExpenses.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-slate-500">
+                    No matching expenses found.
+                </div>
+            ) : (
+                <div className="space-y-3">
+                    {sortedExpenses.map((expense) => (
+                        <ExpenseItem key={expense.id} expense={expense} />
+                    ))}
+                </div>
+            )}
         </div>
     );
 };

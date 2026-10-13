@@ -13,17 +13,17 @@ const IncomeForm = () => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="mb-6 max-w-md">
+        <form onSubmit={handleSubmit} className="space-y-4">
             <input
                 type="number"
                 placeholder="Enter Monthly Income"
                 value={income}
                 onChange={(e) => setIncomeValue(e.target.value)}
-                className="border p-2 rounded w-full"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-4 focus:ring-emerald-100"
             />
             <button
                 type="submit"
-                className="mt-2 bg-green-600 text-white px-4 py-2 rounded"
+                className="w-full rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 px-4 py-3 font-semibold text-white shadow-lg shadow-emerald-200 transition hover:translate-y-[-1px] hover:shadow-xl hover:shadow-emerald-200"
             >
                 Save Income
             </button>
